@@ -1,0 +1,18 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.log
+
+# Insumos pessoais e documentos de trabalho: ficam so na maquina, fora do repo publico
+conteudo_concurso.docx
+duoMari.md
+fontes/
+# notas locais para o assistente (citam ferramentas internas): nunca no repo publico
+CLAUDE.md
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
