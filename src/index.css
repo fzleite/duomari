@@ -967,3 +967,136 @@ input[type='file'] {
     font-size: 1.3rem;
   }
 }
+
+/* ---------- presente do Fernando ---------- */
+
+:root {
+  --rosa: #e5989b;
+  --rosa-fundo: #fff1f2;
+}
+
+.saudacao {
+  margin: 4px 0 0;
+  color: var(--verde);
+  font-style: italic;
+}
+
+.saldo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--rosa-fundo);
+  border: 1px solid #f6d2d4;
+  border-radius: var(--raio);
+}
+
+.saldo-itens {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.saldo-itens div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.saldo-itens span {
+  font-size: 1.4rem;
+}
+
+.saldo-itens strong {
+  font-size: 1.5rem;
+}
+
+.saldo-itens small {
+  color: var(--tinta-suave);
+  font-size: 0.75rem;
+}
+
+.recompensa {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+  padding: 18px 16px;
+  background: var(--rosa-fundo);
+  border: 1px solid #f6d2d4;
+  border-radius: var(--raio);
+  text-align: center;
+}
+
+.recompensa-icone {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.recompensa-rotulo {
+  margin: 0;
+  font-weight: 700;
+}
+
+.recompensa-msg {
+  margin: 0;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.recompensa-assina {
+  margin: 0;
+  color: var(--tinta-suave);
+  font-size: 0.85rem;
+}
+
+.dedicatoria {
+  background: linear-gradient(180deg, #fff 0%, var(--rosa-fundo) 100%);
+}
+
+.dedicatoria-carta {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  max-width: 520px;
+  padding: 26px 22px;
+  background: #fff;
+  border: 1px solid #f6d2d4;
+  border-radius: 20px;
+  box-shadow: var(--sombra);
+}
+
+.dedicatoria-texto {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.7;
+  text-align: left;
+}
+
+.dedicatoria-assina {
+  align-self: flex-end;
+  margin: 0;
+  text-align: right;
+}
+
+.resumo-especial {
+  padding: 18px;
+  background: var(--rosa-fundo);
+  border: 2px solid var(--rosa);
+  border-radius: var(--raio);
+  line-height: 1.6;
+}
+
+.cta-carinho {
+  background: var(--rosa-fundo);
+  border-color: var(--rosa);
+}
+
+.historico-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

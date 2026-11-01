@@ -64,7 +64,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {pendenciasAbertas > 0 && <span className="badge badge-sm">{pendenciasAbertas}</span>}
           </NavLink>
 
+          <NavLink to="/recompensas" className={cls} onClick={fechar}>
+            Recompensas do Fernando
+          </NavLink>
+
           <p className="nav-group">DuoMari</p>
+          <NavLink to="/dedicatoria" className={cls} onClick={fechar}>
+            Dedicatória
+          </NavLink>
           <NavLink to="/dados" className={cls} onClick={fechar}>
             Backup e configurações
           </NavLink>

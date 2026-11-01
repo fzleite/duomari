@@ -1,9 +1,10 @@
+import { decidirRecompensa, sortearMensagem } from '../content/carinho'
 import { CONCURSO } from '../content/concurso'
 import type { DisciplinaId } from '../content/types'
 import { getDB } from './db'
-import type { Leitura, Nota, Settings, Simulado, Tentativa, TipoNota } from './types'
+import type { Leitura, Nota, Recompensa, Settings, Simulado, Tentativa, TipoNota } from './types'
 
-export const DEFAULT_SETTINGS: Settings = { dataProva: CONCURSO.dataProva, nome: '' }
+export const DEFAULT_SETTINGS: Settings = { dataProva: CONCURSO.dataProva, nome: 'Mari', dedicatoriaVista: false }
 
 function novoId(): string {
   return crypto.randomUUID()
@@ -14,20 +15,22 @@ export interface Workspace {
   notas: Nota[]
   leituras: Leitura[]
   simulados: Simulado[]
+  recompensas: Recompensa[]
   settings: Settings
 }
 
 /** App de uma pessoa so: o volume e pequeno, entao carrega tudo na memoria ao abrir. */
 export async function carregarTudo(): Promise<Workspace> {
   const db = await getDB()
-  const [tentativas, notas, leituras, simulados, stored] = await Promise.all([
+  const [tentativas, notas, leituras, simulados, recompensas, stored] = await Promise.all([
     db.getAll('tentativas'),
     db.getAll('notas'),
     db.getAll('leituras'),
     db.getAll('simulados'),
+    db.getAll('recompensas'),
     db.get('settings', 'app') as Promise<Partial<Settings> | undefined>,
   ])
-  return { tentativas, notas, leituras, simulados, settings: { ...DEFAULT_SETTINGS, ...stored } }
+  return { tentativas, notas, leituras, simulados, recompensas, settings: { ...DEFAULT_SETTINGS, ...stored } }
 }
 
 export async function salvarSettings(settings: Settings): Promise<void> {
@@ -81,6 +84,28 @@ export async function registrarRespostas(respostas: RespostaInput[]): Promise<Te
   return tentativas
 }
 
+/**
+ * Conclui uma fase e grava a recompensa. A decisao (faixa, beijo dobrado ao refazer) depende das
+ * recompensas anteriores da MESMA fase; as leituras acontecem antes do put.
+ */
+export async function registrarRecompensa(faseId: string, pct: number): Promise<Recompensa> {
+  const db = await getDB()
+  const [anteriores, todas] = await Promise.all([db.getAllFromIndex('recompensas', 'faseId', faseId), db.getAll('recompensas')])
+  const melhor = anteriores.length ? Math.max(...anteriores.map((r) => r.pct)) : null
+  const ganho = decidirRecompensa(pct, melhor)
+  const ultimaDoTipo = todas.filter((r) => r.tipo === ganho.tipo).sort((a, b) => a.criadaEm.localeCompare(b.criadaEm)).at(-1)
+  const recompensa: Recompensa = {
+    id: novoId(),
+    faseId,
+    pct,
+    ...ganho,
+    mensagem: sortearMensagem(ganho.tipo, pct, ultimaDoTipo?.mensagem),
+    criadaEm: new Date().toISOString(),
+  }
+  await db.put('recompensas', recompensa)
+  return recompensa
+}
+
 export async function salvarSimulado(simulado: Simulado): Promise<void> {
   await (await getDB()).put('simulados', simulado)
 }
@@ -128,12 +153,13 @@ export async function removerNota(id: string): Promise<void> {
 /** Apaga TUDO (progresso, notas, simulados). Usado so na tela de dados, com confirmacao. */
 export async function apagarTudo(): Promise<void> {
   const db = await getDB()
-  const tx = db.transaction(['tentativas', 'notas', 'leituras', 'simulados', 'settings'], 'readwrite')
+  const tx = db.transaction(['tentativas', 'notas', 'leituras', 'simulados', 'recompensas', 'settings'], 'readwrite')
   await Promise.all([
     tx.objectStore('tentativas').clear(),
     tx.objectStore('notas').clear(),
     tx.objectStore('leituras').clear(),
     tx.objectStore('simulados').clear(),
+    tx.objectStore('recompensas').clear(),
     tx.objectStore('settings').clear(),
     tx.done,
   ])

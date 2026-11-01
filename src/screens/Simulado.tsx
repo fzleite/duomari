@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import { RecompensaCard } from '../components/Carinho'
 import { QuestaoView } from '../components/QuestaoView'
 import { TOPICOS, questao as buscarQuestao } from '../content'
 import { CONCURSO, DISCIPLINAS, disciplina } from '../content/concurso'
@@ -60,7 +61,7 @@ export function Simulado() {
 }
 
 function FazerSimulado() {
-  const { tentativas, simulados, registrarSimulado } = useApp()
+  const { tentativas, simulados, registrarSimulado, concluirFase } = useApp()
   const navigate = useNavigate()
   const [rascunho, setRascunho] = useState<Rascunho | null>(lerRascunho)
   const [atual, setAtual] = useState(0)
@@ -145,6 +146,8 @@ function FazerSimulado() {
       duracaoMs: Date.parse(agora) - Date.parse(rascunho.iniciadoEm),
     }
     await registrarSimulado(simulado, respostas)
+    // cada simulado e uma fase nova; a nota da fase e a fracao dos 100 pontos
+    await concluirFase(`simulado:${simulado.id}`, simulado.pontos / 100)
     setRascunho(null)
     navigate(`/simulado/${simulado.id}`)
   }
@@ -215,7 +218,7 @@ function FazerSimulado() {
 }
 
 function ResultadoSimulado({ simuladoId }: { simuladoId: string }) {
-  const { simulados, tentativas } = useApp()
+  const { simulados, tentativas, recompensas } = useApp()
   const s = simulados.find((x) => x.id === simuladoId)
   if (!s) {
     return (
@@ -242,6 +245,11 @@ function ResultadoSimulado({ simuladoId }: { simuladoId: string }) {
       <div className={`resultado ${passou ? 'resultado-ok' : 'resultado-erro'}`}>
         <strong>{r.pontos}</strong> de 100 pontos — {passou ? 'acima' : 'abaixo'} do mínimo de {CONCURSO.pontuacaoMinima}
       </div>
+
+      {(() => {
+        const r = recompensas.find((x) => x.faseId === `simulado:${s.id}`)
+        return r ? <RecompensaCard recompensa={r} /> : null
+      })()}
 
       <table className="tabela">
         <thead>

@@ -3,11 +3,13 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 
 import { AppShell } from './components/AppShell'
 import { Dados } from './screens/Dados'
+import { Dedicatoria } from './screens/Dedicatoria'
 import { Disciplina } from './screens/Disciplina'
 import { Notas } from './screens/Notas'
 import { Painel } from './screens/Painel'
 import { Plano } from './screens/Plano'
 import { Pratica } from './screens/Pratica'
+import { Recompensas } from './screens/Recompensas'
 import { Simulado } from './screens/Simulado'
 import { Sobre } from './screens/Sobre'
 import { Topico } from './screens/Topico'
@@ -19,11 +21,15 @@ import { useApp } from './state/store'
  */
 function Telas() {
   const { pathname, search } = useLocation()
+  const dedicatoriaVista = useApp((s) => s.settings.dedicatoriaVista)
   // chaves obrigatorias: no Chrome recente window.scrollTo() devolve uma Promise, e uma arrow sem
   // chaves a entregaria ao React como "funcao de limpeza" — quebra na desmontagem da tela
   useEffect(() => {
     window.scrollTo({ top: 0 })
   }, [pathname])
+  // primeira abertura: a dedicatoria vem antes de tudo (depois, so pelo menu)
+  if (!dedicatoriaVista && pathname !== '/dedicatoria') return <Navigate to="/dedicatoria" replace />
+
   return (
     <AppShell>
       <Routes key={pathname + search}>
@@ -37,6 +43,8 @@ function Telas() {
         <Route path="/notas" element={<Notas />} />
         <Route path="/pendencias" element={<Navigate to="/notas" replace />} />
         <Route path="/dados" element={<Dados />} />
+        <Route path="/dedicatoria" element={<Dedicatoria />} />
+        <Route path="/recompensas" element={<Recompensas />} />
         <Route path="/sobre" element={<Sobre />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

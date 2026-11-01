@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 
+import { RecompensaCard } from '../components/Carinho'
 import { QuestaoView } from '../components/QuestaoView'
 import { topico as buscarTopico } from '../content'
 import { precisaRevisar } from '../data/metrics'
+import type { Recompensa } from '../data/types'
 import { useApp } from '../state/store'
 
 /**
@@ -14,7 +16,7 @@ export function Pratica() {
   const { id } = useParams()
   const [params] = useSearchParams()
   const soErradas = params.get('erradas') === '1'
-  const { tentativas, responder } = useApp()
+  const { tentativas, responder, concluirFase } = useApp()
   const t = id ? buscarTopico(id) : undefined
 
   // a lista e fixada ao abrir a sessao: responder nao pode tirar a questao de baixo dela
@@ -29,6 +31,7 @@ export function Pratica() {
   const [indice, setIndice] = useState(0)
   const [escolhida, setEscolhida] = useState<number | null>(null)
   const [acertos, setAcertos] = useState(0)
+  const [recompensa, setRecompensa] = useState<Recompensa | null>(null)
   const inicio = useRef(0)
   useEffect(() => {
     inicio.current = Date.now()
@@ -51,14 +54,15 @@ export function Pratica() {
   if (indice >= questoes.length) {
     return (
       <main className="screen screen-center">
-        <h1>Fim da prática</h1>
+        <h1>{soErradas ? 'Revisão concluída' : 'Fase concluída!'}</h1>
         <p className="big">
           {acertos}/{questoes.length}
         </p>
         <p className="muted">acertos neste tópico</p>
+        {recompensa && <RecompensaCard recompensa={recompensa} />}
         {revisar && (
           <div className="aviso">
-            Muitos erros recentes neste tópico. Volte à explicação e considere registrar uma pendência de aprofundamento.
+            Esse tópico ainda está pedindo um pouquinho mais de atenção: vale reler a explicação e, se quiser, registrar uma pendência de aprofundamento.
           </div>
         )}
         <div className="acoes-topico">
@@ -91,7 +95,11 @@ export function Pratica() {
     ])
   }
 
-  const proxima = () => {
+  const proxima = async () => {
+    // fase = pratica COMPLETA do topico; "refazer as erradas" nao conta (decisao do usuario)
+    if (indice + 1 >= questoes.length && !soErradas) {
+      setRecompensa(await concluirFase(`topico:${t.id}`, acertos / questoes.length))
+    }
     setEscolhida(null)
     setIndice((i) => i + 1)
     inicio.current = Date.now()

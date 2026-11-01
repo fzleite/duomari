@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom'
 
 import { Barra } from '../components/Barra'
+import { SaldoCarinhoso } from '../components/Carinho'
 import { pct } from '../components/formato'
 import { TOPICOS, topicosDaSemana } from '../content'
+import { saudacaoDoDia } from '../content/carinho'
 import { CONCURSO, DISCIPLINAS, SEMANAS, disciplina } from '../content/concurso'
 import {
   coberturaEmenta,
   diasAte,
   diasComAtividade,
+  motivoResumo,
   pontos,
   semanaAtual,
   sequenciaDias,
@@ -18,7 +21,8 @@ import {
 import { useApp } from '../state/store'
 
 export function Painel() {
-  const { tentativas, leituras, notas, simulados, settings } = useApp()
+  const { tentativas, leituras, notas, simulados, recompensas, settings } = useApp()
+  const resumo = motivoResumo(recompensas, settings.dataProva)
   const cobertura = coberturaEmenta(tentativas, leituras)
   const porDisc = statsPorDisciplina(tentativas, leituras)
   const fracos = topicosFracos(tentativas, leituras)
@@ -40,7 +44,8 @@ export function Painel() {
       <section className="hero">
         <div>
           <h1>{settings.nome ? `Olá, ${settings.nome}!` : 'Olá!'}</h1>
-          <p className="muted">PEB III Geografia — FEG Mogi Guaçu</p>
+          <p className="saudacao">{saudacaoDoDia()}</p>
+          <p className="muted small">PEB III Geografia — FEG Mogi Guaçu</p>
         </div>
         <div className="contagem" aria-label="Contagem regressiva">
           {faltamProva > 0 ? (
@@ -75,6 +80,15 @@ export function Painel() {
           <small className="muted">{tentativas.length} respostas</small>
         </div>
       </section>
+
+      {resumo && (
+        <Link to="/recompensas" className="cta cta-carinho">
+          <span className="small">{resumo === 'trilha' ? 'Você completou a trilha!' : resumo === 'vespera' ? 'Amanhã é o grande dia' : 'Hoje é o grande dia'}</span>
+          <strong>Tem um resumo especial do Fernando para você →</strong>
+        </Link>
+      )}
+
+      <SaldoCarinhoso />
 
       {proximo && (
         <Link to={`/topico/${proximo.id}`} className="cta">

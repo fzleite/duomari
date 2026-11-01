@@ -1,6 +1,6 @@
 import { getDB } from './db'
 import { carregarTudo } from './repo'
-import type { BackupFile, Leitura, Nota, Simulado, Tentativa } from './types'
+import type { BackupFile, Leitura, Nota, Recompensa, Simulado, Tentativa } from './types'
 
 export const BACKUP_VERSION = 1
 
@@ -19,6 +19,7 @@ export async function exportarTudo(): Promise<BackupFile> {
     notas: w.notas,
     leituras: w.leituras,
     simulados: w.simulados,
+    recompensas: w.recompensas,
     settings: w.settings,
   }
 }
@@ -71,6 +72,7 @@ function validarBackup(data: unknown): BackupFile {
     notas: (c.notas ?? []) as Nota[],
     leituras: (c.leituras ?? []) as Leitura[],
     simulados: (c.simulados ?? []) as Simulado[],
+    recompensas: (c.recompensas ?? []) as Recompensa[],
     settings: c.settings ?? {},
   }
 }
@@ -80,6 +82,7 @@ export interface ResultadoImportacao {
   notas: number
   leituras: number
   simulados: number
+  recompensas: number
 }
 
 /**
@@ -94,17 +97,20 @@ export async function importarBackup(file: File, modo: 'substituir' | 'mesclar')
   const atual = (await carregarTudo()).settings
   const db = await getDB()
 
-  const tx = db.transaction(['tentativas', 'notas', 'leituras', 'simulados', 'settings'], 'readwrite')
+  const recompensas = backup.recompensas ?? []
+  const tx = db.transaction(['tentativas', 'notas', 'leituras', 'simulados', 'recompensas', 'settings'], 'readwrite')
   if (modo === 'substituir') {
     tx.objectStore('tentativas').clear()
     tx.objectStore('notas').clear()
     tx.objectStore('leituras').clear()
     tx.objectStore('simulados').clear()
+    tx.objectStore('recompensas').clear()
   }
   for (const t of backup.tentativas) tx.objectStore('tentativas').put(t)
   for (const n of backup.notas) tx.objectStore('notas').put(n)
   for (const l of backup.leituras) tx.objectStore('leituras').put(l)
   for (const s of backup.simulados) tx.objectStore('simulados').put(s)
+  for (const r of recompensas) tx.objectStore('recompensas').put(r)
   tx.objectStore('settings').put({ ...atual, ...backup.settings }, 'app')
   await tx.done
 
@@ -113,5 +119,6 @@ export async function importarBackup(file: File, modo: 'substituir' | 'mesclar')
     notas: backup.notas.length,
     leituras: backup.leituras.length,
     simulados: backup.simulados.length,
+    recompensas: recompensas.length,
   }
 }

@@ -104,9 +104,35 @@ Tudo é **derivado na leitura**, nada é gravado. Por isso mudar um critério va
 Os parâmetros (limites de tópico fraco, janela de sugestão, pontos) estão juntos no topo de
 `metrics.ts` e foram escolhidos por mim para calibrar com o uso real.
 
+## Presente do Fernando (`src/content/carinho.ts`)
+
+O DuoMari é um presente do Fernando para a Mariana. O tom de todas as mensagens é leve e
+carinhoso, de quem está começando a se conhecer, com admiração e sem soar como relação já
+consolidada. Nota baixa **nunca** vira bronca.
+
+- **Dedicatória**: abre sozinha na primeira abertura (`settings.dedicatoriaVista`) e depois fica
+  no menu. O **texto aprovado** está em `DEDICATORIA`, e `tools/check-carinho.mts` reprova o build
+  se ele mudar.
+- **Fase** = prática **completa** das 6 questões de um tópico, ou um simulado entregue (a nota é a
+  fração dos 100 pontos). "Refazer as que errei" não conta como fase.
+- **Faixas** (confirmadas): 80% ou mais → **1 beijo**; 50–79% → **1 abraço bem apertado**; menos de
+  50% → **1 tempo de qualidade** com o Fernando.
+- **Refazer uma fase** (decidido com o usuário): se subir de faixa em relação à melhor nota
+  anterior **ou** chegar a 80% ou mais, ganha **beijo dobrado** (+2 beijos). Se não, ganha a
+  recompensa normal da faixa. Consequência aceita: refazer uma fase que já estava em 80% ou mais e
+  tirar 80% ou mais de novo também dá beijo dobrado.
+- **Mensagens**: há um banco com 6 ou 7 versões por recompensa, e o sorteio evita repetir a última
+  mensagem do mesmo tipo. A mensagem fica gravada na recompensa, então o histórico mostra o mesmo
+  texto que ela viu.
+- **Acumuladores**: a store `recompensas` (**DB v2**) é append-only. Beijos, abraços e tempos são a
+  soma dos registros, aparecem no "Saldo carinhoso" do painel e entram no backup (campo opcional
+  `recompensas`).
+- **Resumo especial**: aparece na véspera e no dia da prova, ou ao concluir a prática de todos os
+  54 tópicos. Fica no painel e em `/recompensas`.
+
 ## Verificação no build
 
-- `npm run build` = `tsc -b` → `check:content` → `vite build` → `spa-fallback`.
+- `npm run build` = `tsc -b` → `check:content` → `check:carinho` → `vite build` → `spa-fallback`.
 - `tools/validar.mts`: contagem de tópicos por disciplina e presença de cada código da ementa; ids
   únicos; 5 alternativas sem repetição; 4 justificativas; níveis 1, 2 e 3 em progressão;
   explicação mínima; links dentro da curadoria; ausência de HTML no texto.

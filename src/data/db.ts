@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 
-import type { Leitura, Nota, Simulado, Tentativa } from './types'
+import type { Leitura, Nota, Recompensa, Simulado, Tentativa } from './types'
 
 /**
  * ATENCAO ao adicionar uma object store nova depois que o app ja esta instalado: o bloco
@@ -12,7 +12,8 @@ import type { Leitura, Nota, Simulado, Tentativa } from './types'
  * qualquer um orfana o IndexedDB instalado ou quebra backups antigos.
  */
 export const DB_NAME = 'duomari'
-export const DB_VERSION = 1
+// v2: store 'recompensas' (presente do Fernando)
+export const DB_VERSION = 2
 
 interface DuomariDB extends DBSchema {
   tentativas: {
@@ -27,6 +28,11 @@ interface DuomariDB extends DBSchema {
   }
   leituras: { key: string; value: Leitura }
   simulados: { key: string; value: Simulado }
+  recompensas: {
+    key: string
+    value: Recompensa
+    indexes: { faseId: string }
+  }
   settings: { key: string; value: unknown }
 }
 
@@ -49,6 +55,10 @@ export function getDB(): Promise<IDBPDatabase<DuomariDB>> {
       }
       if (!db.objectStoreNames.contains('simulados')) {
         db.createObjectStore('simulados', { keyPath: 'id' })
+      }
+      if (!db.objectStoreNames.contains('recompensas')) {
+        const store = db.createObjectStore('recompensas', { keyPath: 'id' })
+        store.createIndex('faseId', 'faseId')
       }
       if (!db.objectStoreNames.contains('settings')) {
         db.createObjectStore('settings')

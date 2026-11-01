@@ -1,7 +1,7 @@
 import { DISCIPLINAS, SEMANAS, disciplina as dadosDisciplina } from '../content/concurso'
 import { TOPICOS } from '../content'
 import type { DisciplinaId, Topico } from '../content/types'
-import type { Leitura, Nota, Simulado, Tentativa } from './types'
+import type { Leitura, Nota, Recompensa, Simulado, Tentativa } from './types'
 
 /**
  * Tudo aqui e DERIVADO em leitura a partir do log append-only de tentativas (+ leituras, notas,
@@ -215,4 +215,38 @@ export function pontuarSimulado(respostas: Pick<Tentativa, 'disciplina' | 'corre
     return { id: d.id, acertos, total: daDisc.length, pontos: acertos * peso, maximo: d.questoesNaProva * peso }
   })
   return { pontos: porDisciplina.reduce((s, d) => s + d.pontos, 0), porDisciplina }
+}
+
+// ---------- presente do Fernando: saldo carinhoso ----------
+
+export interface Saldo {
+  beijos: number
+  abracos: number
+  tempos: number
+  fases: number
+}
+
+/** Os contadores sao a soma das recompensas gravadas (append-only), nunca um numero mutavel. */
+export function saldo(recompensas: Recompensa[]): Saldo {
+  return recompensas.reduce(
+    (s, r) => ({ beijos: s.beijos + r.beijos, abracos: s.abracos + r.abracos, tempos: s.tempos + r.tempos, fases: s.fases + 1 }),
+    { beijos: 0, abracos: 0, tempos: 0, fases: 0 },
+  )
+}
+
+/** Topicos com pelo menos uma pratica completa (fase concluida). */
+export function topicosConcluidos(recompensas: Recompensa[]): number {
+  return new Set(recompensas.filter((r) => r.faseId.startsWith('topico:')).map((r) => r.faseId)).size
+}
+
+/**
+ * Quando mostrar o resumo especial: na vespera (e no dia/depois) da prova, ou ao concluir a
+ * trilha inteira (pratica completa de todos os topicos). null = ainda nao.
+ */
+export function motivoResumo(recompensas: Recompensa[], dataProva: string, hoje = new Date()): 'trilha' | 'vespera' | 'prova' | null {
+  const faltam = diasAte(dataProva, hoje)
+  if (faltam <= 0) return 'prova'
+  if (faltam === 1) return 'vespera'
+  if (topicosConcluidos(recompensas) >= TOPICOS.length) return 'trilha'
+  return null
 }

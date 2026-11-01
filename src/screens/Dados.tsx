@@ -22,7 +22,7 @@ export function Dados() {
       if (modo === 'substituir' && !confirm('Substituir TODOS os dados deste aparelho pelos do backup?')) return
       const r = await importarBackup(file, modo)
       await init()
-      setStatus(`Importado: ${r.tentativas} respostas, ${r.notas} notas, ${r.leituras} tópicos estudados, ${r.simulados} simulados.`)
+      setStatus(`Importado: ${r.tentativas} respostas, ${r.notas} notas, ${r.leituras} tópicos estudados, ${r.simulados} simulados, ${r.recompensas} recompensas.`)
     } catch (e) {
       setStatus(e instanceof Error ? e.message : 'Não foi possível importar este arquivo.')
     } finally {
@@ -88,7 +88,7 @@ export function Dados() {
 
       <section className="card">
         <h2>Apagar tudo</h2>
-        <p className="muted small">Remove respostas, notas, simulados e configurações deste aparelho. Exporte um backup antes.</p>
+        <p className="muted small">Remove respostas, notas, simulados, recompensas e configurações deste aparelho. Exporte um backup antes.</p>
         <button
           type="button"
           className="btn btn-danger"

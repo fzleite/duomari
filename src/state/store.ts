@@ -6,13 +6,14 @@ import {
   carregarTudo,
   criarNota,
   marcarLeitura,
+  registrarRecompensa,
   registrarRespostas,
   removerNota,
   salvarSettings,
   salvarSimulado,
   type RespostaInput,
 } from '../data/repo'
-import type { Leitura, Nota, Settings, Simulado, Tentativa, TipoNota } from '../data/types'
+import type { Leitura, Nota, Recompensa, Settings, Simulado, Tentativa, TipoNota } from '../data/types'
 
 interface AppState {
   ready: boolean
@@ -20,11 +21,13 @@ interface AppState {
   notas: Nota[]
   leituras: Leitura[]
   simulados: Simulado[]
+  recompensas: Recompensa[]
   settings: Settings
 
   init: () => Promise<void>
   responder: (respostas: RespostaInput[]) => Promise<Tentativa[]>
   registrarSimulado: (simulado: Simulado, respostas: RespostaInput[]) => Promise<Tentativa[]>
+  concluirFase: (faseId: string, pct: number) => Promise<Recompensa>
   alternarLeitura: (topicoId: string, lida: boolean) => Promise<void>
   adicionarNota: (input: { topicoId: string; tipo: TipoNota; texto: string; referencia?: string }) => Promise<Nota>
   editarNota: (nota: Nota, patch: Partial<Pick<Nota, 'texto' | 'referencia' | 'resolvida'>>) => Promise<void>
@@ -38,6 +41,7 @@ export const useApp = create<AppState>((set, get) => ({
   notas: [],
   leituras: [],
   simulados: [],
+  recompensas: [],
   settings: DEFAULT_SETTINGS,
 
   init: async () => {
@@ -55,6 +59,12 @@ export const useApp = create<AppState>((set, get) => ({
     await salvarSimulado(simulado)
     set((s) => ({ tentativas: [...s.tentativas, ...novas], simulados: [...s.simulados, simulado] }))
     return novas
+  },
+
+  concluirFase: async (faseId, pct) => {
+    const r = await registrarRecompensa(faseId, pct)
+    set((s) => ({ recompensas: [...s.recompensas, r] }))
+    return r
   },
 
   alternarLeitura: async (topicoId, lida) => {

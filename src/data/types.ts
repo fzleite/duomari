@@ -1,3 +1,4 @@
+import type { TipoRecompensa } from '../content/carinho'
 import type { DisciplinaId } from '../content/types'
 
 /**
@@ -56,10 +57,31 @@ export interface Simulado {
   duracaoMs: number
 }
 
+/**
+ * Recompensa carinhosa do Fernando ao concluir uma fase (pratica completa de um topico ou
+ * simulado). Append-only: os contadores de beijos/abracos/tempos sao a SOMA destes registros —
+ * por isso viajam no backup e nao ha contador mutavel para dessincronizar.
+ */
+export interface Recompensa {
+  id: string
+  /** `topico:GE17` ou `simulado:<id>`. Refazer a mesma fase repete o faseId. */
+  faseId: string
+  /** Fracao de acerto da fase (0 a 1). */
+  pct: number
+  tipo: TipoRecompensa
+  beijos: number
+  abracos: number
+  tempos: number
+  mensagem: string
+  criadaEm: string
+}
+
 export interface Settings {
   /** Data da prova (AAAA-MM-DD). Editavel: o Edital de Convocacao pode alterar. */
   dataProva: string
   nome: string
+  /** A dedicatoria aparece sozinha so na primeira abertura; depois, pelo menu. */
+  dedicatoriaVista: boolean
 }
 
 export interface BackupFile {
@@ -70,5 +92,7 @@ export interface BackupFile {
   notas: Nota[]
   leituras: Leitura[]
   simulados: Simulado[]
+  /** Opcional: backups gerados antes das recompensas nao tem o campo. */
+  recompensas?: Recompensa[]
   settings?: Partial<Settings>
 }
